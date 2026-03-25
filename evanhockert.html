@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evan Hockert</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&display=swap" rel="stylesheet">
+
+<style>
+  /* ── Reset ── */
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  /* ── Paper palette ── */
+  :root {
+    --paper: #FAF7F2;
+    --paper-edge: #F0EDE6;
+    --ink: #1A1714;
+    --ink-light: #5C564E;
+    --ink-faint: #9E978D;
+    --rule: #D8D3CA;
+    --accent: #1A1714;
+  }
+
+  /* ── Base ── */
+  html {
+    font-size: 18px;
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: 'Cormorant', 'Georgia', serif;
+    font-weight: 400;
+    color: var(--ink);
+    background-color: var(--paper);
+    line-height: 1.7;
+    letter-spacing: 0.005em;
+    position: relative;
+    min-height: 100vh;
+  }
+
+  /* ── Paper grain texture ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.3;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.5'/%3E%3C/svg%3E");
+    background-size: 200px;
+  }
+
+  /* ── Page container ── */
+  .page {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 6rem 2rem 5rem;
+    position: relative;
+  }
+
+  /* ── Navigation ── */
+  nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 6rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 0.5px solid var(--rule);
+    opacity: 0;
+    animation: fadeUp 0.8s ease-out 0.1s forwards;
+  }
+
+  .site-name {
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-size: 0.82rem;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    text-decoration: none;
+    transition: color 0.3s ease;
+    position: relative;
+  }
+
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 0.5px;
+    background: var(--ink);
+    transition: width 0.3s ease;
+  }
+
+  .nav-links a:hover {
+    color: var(--ink);
+  }
+
+  .nav-links a:hover::after {
+    width: 100%;
+  }
+
+  /* ── Hello section ── */
+  .hello {
+    margin-bottom: 7rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease-out 0.3s forwards;
+  }
+
+  .hello-label {
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 2rem;
+  }
+
+  .hello h1 {
+    font-size: 2.8rem;
+    font-weight: 300;
+    line-height: 1.25;
+    letter-spacing: -0.005em;
+    margin-bottom: 1.8rem;
+    max-width: 580px;
+  }
+
+  .hello p {
+    font-size: 1.15rem;
+    font-weight: 400;
+    line-height: 1.75;
+    color: var(--ink-light);
+    max-width: 520px;
+    font-style: italic;
+  }
+
+  /* ── Divider ── */
+  .divider {
+    width: 40px;
+    height: 0.5px;
+    background: var(--rule);
+    margin: 5rem 0;
+    opacity: 0;
+    animation: fadeUp 0.6s ease-out 0.5s forwards;
+  }
+
+  /* ── Images section ── */
+  .images-section {
+    margin-bottom: 7rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease-out 0.6s forwards;
+  }
+
+  .section-label {
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 2.5rem;
+  }
+
+  .image-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.2rem;
+  }
+
+  .image-card {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 4 / 5;
+    background: var(--paper-edge);
+    border: 0.5px solid var(--rule);
+    cursor: pointer;
+    transition: transform 0.4s ease;
+  }
+
+  .image-card:first-child {
+    grid-row: span 2;
+    aspect-ratio: auto;
+  }
+
+  .image-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: grayscale(20%) contrast(1.02);
+    transition: filter 0.5s ease, transform 0.6s ease;
+  }
+
+  .image-card:hover img {
+    filter: grayscale(0%) contrast(1.05);
+    transform: scale(1.02);
+  }
+
+  .image-card .caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1.2rem 1rem 0.8rem;
+    background: linear-gradient(to top, rgba(26,23,20,0.5), transparent);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .image-card:hover .caption {
+    opacity: 1;
+  }
+
+  .caption span {
+    font-size: 0.72rem;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #FAF7F2;
+  }
+
+  /* ── Projects section ── */
+  .projects-section {
+    margin-bottom: 5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease-out 0.8s forwards;
+  }
+
+  .project-list {
+    list-style: none;
+  }
+
+  .project-item {
+    border-top: 0.5px solid var(--rule);
+    padding: 1.6rem 0;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: baseline;
+    gap: 2rem;
+    cursor: pointer;
+    transition: padding-left 0.3s ease;
+  }
+
+  .project-item:last-child {
+    border-bottom: 0.5px solid var(--rule);
+  }
+
+  .project-item:hover {
+    padding-left: 0.5rem;
+  }
+
+  .project-title {
+    font-size: 1.35rem;
+    font-weight: 400;
+    line-height: 1.3;
+    transition: color 0.3s ease;
+  }
+
+  .project-item:hover .project-title {
+    color: var(--ink);
+  }
+
+  .project-desc {
+    font-size: 0.88rem;
+    color: var(--ink-faint);
+    margin-top: 0.35rem;
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  .project-year {
+    font-size: 0.78rem;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    color: var(--ink-faint);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Footer ── */
+  footer {
+    margin-top: 5rem;
+    padding-top: 1.5rem;
+    border-top: 0.5px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    opacity: 0;
+    animation: fadeUp 0.6s ease-out 1s forwards;
+  }
+
+  .footer-left {
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 1.5rem;
+    list-style: none;
+  }
+
+  .footer-links a {
+    font-size: 0.72rem;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  .footer-links a:hover {
+    color: var(--ink);
+  }
+
+  /* ── Animations ── */
+  @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 640px) {
+    html { font-size: 16px; }
+
+    .page { padding: 3.5rem 1.5rem 3rem; }
+
+    nav { margin-bottom: 4rem; }
+
+    .hello { margin-bottom: 5rem; }
+
+    .hello h1 { font-size: 2.1rem; }
+
+    .image-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .image-card:first-child {
+      grid-row: auto;
+      aspect-ratio: 3 / 2;
+    }
+
+    .image-card {
+      aspect-ratio: 3 / 2;
+    }
+
+    .project-item {
+      grid-template-columns: 1fr;
+      gap: 0.3rem;
+    }
+
+    footer {
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+  }
+
+  /* ── Selection color ── */
+  ::selection {
+    background: rgba(26, 23, 20, 0.12);
+    color: var(--ink);
+  }
+
+  /* ── Placeholder images ── */
+  .placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    background: var(--paper-edge);
+  }
+</style>
+</head>
+
+<body>
+
+<div class="page">
+
+  <!-- Navigation -->
+  <nav>
+    <div class="site-name">Evan Hockert</div>
+    <ul class="nav-links">
+      <li><a href="#hello">About</a></li>
+      <li><a href="#images">Gallery</a></li>
+      <li><a href="#projects">Projects</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hello -->
+  <section class="hello" id="hello">
+    <div class="hello-label">Hello</div>
+    <h1>Engineer working at the intersection of silicon and&nbsp;systems.</h1>
+    <p>SoC Physical Design at Apple, Beaverton.
+       Interested in computer architecture, neuromorphic computing,
+       and the craft of turning logic into&nbsp;layout.</p>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- Images -->
+  <section class="images-section" id="images">
+    <div class="section-label">Images</div>
+    <div class="image-grid">
+      <div class="image-card">
+        <div class="placeholder">Photo 1</div>
+        <div class="caption"><span>Your image here</span></div>
+      </div>
+      <div class="image-card">
+        <div class="placeholder">Photo 2</div>
+        <div class="caption"><span>Your image here</span></div>
+      </div>
+      <div class="image-card">
+        <div class="placeholder">Photo 3</div>
+        <div class="caption"><span>Your image here</span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- Selected Projects -->
+  <section class="projects-section" id="projects">
+    <div class="section-label">Selected Projects</div>
+    <ul class="project-list">
+      <li class="project-item">
+        <div>
+          <div class="project-title">Saturation Adder — RTL to GDS</div>
+          <div class="project-desc">Full flow implementation using Cadence Genus &amp; Innovus on the Sky130 PDK</div>
+        </div>
+        <div class="project-year">2025</div>
+      </li>
+      <li class="project-item">
+        <div>
+          <div class="project-title">Neuromorphic Computing Research</div>
+          <div class="project-desc">Exploring brain-inspired architectures and their physical design implications</div>
+        </div>
+        <div class="project-year">2024–</div>
+      </li>
+      <li class="project-item">
+        <div>
+          <div class="project-title">AI Research Reading Group</div>
+          <div class="project-desc">Organizing cross-disciplinary sessions on recent papers in machine learning</div>
+        </div>
+        <div class="project-year">2025–</div>
+      </li>
+      <li class="project-item">
+        <div>
+          <div class="project-title">Personal Website</div>
+          <div class="project-desc">This page — typeset in Cormorant on digital paper</div>
+        </div>
+        <div class="project-year">2026</div>
+      </li>
+    </ul>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-left">© 2026</div>
+    <ul class="footer-links">
+      <li><a href="mailto:evan@evanhockert.com">Email</a></li>
+      <li><a href="#">LinkedIn</a></li>
+      <li><a href="#">GitHub</a></li>
+    </ul>
+  </footer>
+
+</div>
+
+</body>
+</html>
